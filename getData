@@ -1,0 +1,53 @@
+import requests
+
+# 设置请求头，模拟浏览器访问
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+    "Referer": "https://leetcode.cn/problemset/",
+}
+
+# 力扣中文版题目列表 API
+problem_list_url = "https://leetcode.cn/api/problems/all/"
+
+
+# 获取题目列表
+def fetch_problem_list():
+    try:
+        response = requests.get(problem_list_url, headers=headers)
+        response.raise_for_status()  # 检查 HTTP 响应状态码
+        data = response.json()
+        return data["stat_status_pairs"]
+    except Exception as e:
+        print(f"获取题目列表失败: {e}")
+        return []
+
+
+# 打印题目信息
+def print_problems(problems):
+    for problem in problems:
+        stat = problem["stat"]
+        question_id = stat["question_id"]
+        title = stat["question__title"]
+        slug = stat["question__title_slug"]
+        difficulty = problem["difficulty"]["level"]
+
+        # 将难度等级转换为文字
+        difficulty_map = {1: "简单", 2: "中等", 3: "困难"}
+        difficulty_text = difficulty_map.get(difficulty, "未知")
+
+        print(f"ID: {question_id}, 标题: {title}, 难度: {difficulty_text}, Slug: {slug}")
+
+
+# 主函数
+def main():
+    problems = fetch_problem_list()
+    if not problems:
+        print("未获取到题目列表")
+        return
+
+    print(f"共获取到 {len(problems)} 道题目：\n")
+    print_problems(problems)
+
+
+if __name__ == "__main__":
+    main()
