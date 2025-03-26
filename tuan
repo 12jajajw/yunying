@@ -1,0 +1,113 @@
+from PIL import Image, ImageDraw, ImageFont
+import textwrap
+import random
+
+# 卡片参数
+WIDTH, HEIGHT = 800, 1200  # 小红书推荐尺寸
+MARGIN = 50  # 边距
+LINE_SPACING = 15  # 行间距
+
+# 随机背景颜色
+def get_random_background():
+    """随机生成浅色背景"""
+    colors = [
+        (255, 240, 245),  # 浅粉色
+        (240, 255, 240),  # 浅绿色
+        (240, 248, 255),  # 浅蓝色
+        (255, 250, 205),  # 浅黄色
+        (230, 230, 250),  # 浅紫色
+    ]
+    return random.choice(colors)
+
+# 随机字体
+def get_random_font(size):
+    """随机选择字体"""
+    fonts = [
+        "SourceHanSans-Regular.otf",  # 思源黑体
+        "Roboto-Regular.ttf",         # Roboto
+        "OpenSans-Regular.ttf",       # Open Sans
+        "Lobster-Regular.ttf",        # Lobster
+    ]
+    font_path = random.choice(fonts)
+    try:
+        return ImageFont.truetype(font_path, size)
+    except IOError:
+        print(f"字体文件 {font_path} 未找到，请确保路径正确！")
+        exit()
+
+# 自动换行处理
+def wrap_text(text, font, max_width):
+    """将文本按宽度自动换行"""
+    lines = []
+    for line in text.split("\n"):
+        if draw.textlength(line, font=font) <= max_width:
+            lines.append(line)
+        else:
+            wrapped_lines = textwrap.wrap(line, width=int(max_width / (size * 0.6)))
+            lines.extend(wrapped_lines)
+    return lines
+
+# 输入文案
+title = "🌟周末旅行 | 来一场说走就走的短途冒险！"
+text = """
+这个周末，我选择了去杭州西湖放松心情 🌿。
+清晨的湖面波光粼粼，搭配一杯热咖啡☕️，
+简直是治愈系的完美组合！
+推荐大家来这里感受自然之美，享受片刻宁静～
+"""
+
+# 创建画布
+background_color = get_random_background()
+image = Image.new("RGB", (WIDTH, HEIGHT), background_color)
+draw = ImageDraw.Draw(image)
+
+# 加载随机字体
+font_title = get_random_font(50)  # 标题字体大小
+font_body = get_random_font(40)   # 正文字体大小
+
+# 绘制标题
+title_position = (MARGIN, MARGIN)
+draw.text(title_position, title, font=font_title, fill=(random.randint(0, 100), random.randint(0, 100), random.randint(0, 100)))
+
+# 绘制正文
+y_offset = MARGIN + font_title.getsize(title)[1] + 30  # 标题下方留出空白
+wrapped_lines = wrap_text(text, font_body, WIDTH - 2 * MARGIN)
+
+for line in wrapped_lines:
+    draw.text((MARGIN, y_offset), line, font=font_body, fill=(random.randint(0, 100), random.randint(0, 100), random.randint(0, 100)))
+    y_offset += font_body.getsize(line)[1] + LINE_SPACING
+
+# 添加随机装饰元素（如分割线或图标）
+line_y = y_offset + 20
+if random.choice([True, False]):
+    # 随机添加分割线
+    draw.line(
+        [(MARGIN, line_y), (WIDTH - MARGIN, line_y)],
+        fill=(random.randint(150, 255), random.randint(150, 255), random.randint(150, 255)),
+        width=2
+    )
+else:
+    # 随机添加角标
+    corner_text = random.choice(["✨生活点滴", "🌟旅行记忆", "🌈灵感记录"])
+    corner_font = get_random_font(30)
+    corner_position = (
+        WIDTH - MARGIN - draw.textlength(corner_text, font=corner_font),
+        HEIGHT - MARGIN - 40
+    )
+    draw.text(
+        corner_position,
+        corner_text,
+        font=corner_font,
+        fill=(random.randint(100, 200), random.randint(100, 200), random.randint(100, 200))
+    )
+
+# 随机添加边框（可选）
+if random.choice([True, False]):
+    border_color = (random.randint(200, 255), random.randint(200, 255), random.randint(200, 255))
+    draw.rectangle([(0, 0), (WIDTH - 1, HEIGHT - 1)], outline=border_color, width=10)
+
+# 保存卡片
+output_path = f"beautiful_card_{random.randint(1000, 9999)}.png"
+image.save(output_path)
+print(f"卡片已生成：{output_path}")
+
